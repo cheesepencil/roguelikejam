@@ -1,0 +1,24 @@
+{
+  "name": "roguelikejam",
+  "version": "1.0.0",
+  "description": "* [My Little Roguelike #1](https://itch.io/jam/mylittleroguelike1)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cheesepencil/roguelikejam.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cheesepencil/roguelikejam/issues"
+  },
+  "homepage": "https://github.com/cheesepencil/roguelikejam#readme",
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4",
+    "phaser": "^3.23.0",
+    "typescript": "^3.8.3"
+  }
+}
