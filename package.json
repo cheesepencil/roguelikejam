@@ -1,10 +1,11 @@
 {
   "name": "roguelikejam",
   "version": "1.0.0",
-  "description": "* [My Little Roguelike #1](https://itch.io/jam/mylittleroguelike1)",
+  "description": "An entry for My Little Roguelike #1",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "parcel index.html",
+    "build": "parcel build index.thml --public-url ./"
   },
   "repository": {
     "type": "git",
@@ -17,6 +18,7 @@
   },
   "homepage": "https://github.com/cheesepencil/roguelikejam#readme",
   "devDependencies": {
+    "@types/node": "^13.13.5",
     "parcel-bundler": "^1.12.4",
     "phaser": "^3.23.0",
     "typescript": "^3.8.3"
