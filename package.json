@@ -19,6 +19,7 @@
   "homepage": "https://github.com/cheesepencil/roguelikejam#readme",
   "devDependencies": {
     "@types/node": "^13.13.5",
+    "eslint": "^7.0.0",
     "parcel-bundler": "^1.12.4",
     "phaser": "^3.23.0",
     "typescript": "^3.8.3"
