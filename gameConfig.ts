@@ -28,8 +28,8 @@ export const MyGameConfig: GameConfig = {
             fps: fps
         }
     },
-    width: 640,
-    height: 640,
+    width: 256,
+    height: 256,
     fps: {
         target: fps,
         //forceSetTimeOut: true

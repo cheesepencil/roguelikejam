@@ -1,17 +1,16 @@
 import { Forest } from "./forest";
 
 export class ForestNode {
-    forest: Forest;
     x: number;
     y: number;
-    north: ForestNode;
-    south: ForestNode;
-    east: ForestNode;
-    west: ForestNode;
+    connections: ForestNode[];
+    stepsFromStart: number;
+    flag: string;
 
-    constructor(x: number, y: number, forest: Forest) {
+    constructor(x: number, y: number, stepsFromStart: number = 0) {
         this.x = x;
         this.y = y;
-        this.forest = forest;
+        this.stepsFromStart = stepsFromStart;
+        this.connections = [];
     }
 }

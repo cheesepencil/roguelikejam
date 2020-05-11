@@ -1,33 +1,125 @@
 import { ForestNode } from "./forestNode";
 
 export class Forest {
-    directions: string[] = ["north", "east", "south", "west"];
+    width: number;
+    height: number;
     nodes: ForestNode[];
 
-    constructor() {
+    constructor(width: number, height: number) {
         this.nodes = [];
+        this.width = width;
+        this.height = height;
 
-        // build initial array of unconnected cells
-        for (let i = 0; i < 9; i++) {
-            for (let j = 0; j < 9; j++) {
-                let newNode = new ForestNode(i, j, this);
+        /** build initial array of unconnected cells */
+        for (let i = 0; i < width; i++) {
+            for (let j = 0; j < height; j++) {
+                let newNode = new ForestNode(i, j);
                 this.nodes.push(newNode);
             }
         }
 
-        let here = this.getNode(4, 4);
-        let visitedNodes: ForestNode[] = [];
-        let walking = true;
+        // crossroads forest init
+        let crossroads = this.getNode(
+            Math.floor(width / 2),
+            Math.floor(height / 2)
+        );
+        let starters = [
+            this.getNode(crossroads.x, crossroads.y - 1),
+            this.getNode(crossroads.x, crossroads.y + 1),
+            this.getNode(crossroads.x - 1, crossroads.y),
+            this.getNode(crossroads.x + 1, crossroads.y),
+        ];
+        let visitedNodes: ForestNode[] = [crossroads, ...starters];
+        for (let i = 0; i < starters.length; i++) {
+            this.connectNodes(crossroads, starters[i]);
+            starters[i].stepsFromStart = 1;
+        }
+
+        let passes = 0;
+        while (passes < 4) {
+            passes = 0;
+            for (let i = 0; i < starters.length; i++) {
+                let here = starters[i];
+                let candidateNodes = this.getUnvisitedNeighbors(here);
+                if (candidateNodes.length === 0) {
+                    here.flag = "poi";
+                    passes++;
+                    continue;
+                }
+
+                let nextNode =
+                    candidateNodes[
+                        Phaser.Math.Between(0, candidateNodes.length - 1)
+                    ];
+
+                nextNode.stepsFromStart = here.stepsFromStart + 1;
+
+                this.connectNodes(here, nextNode);
+
+                visitedNodes.push(nextNode);
+
+                starters[i] = nextNode;
+            }
+        }
+        // hunt and kill what's left
+        while (true) {
+            let start = this.hunt();
+            if (start === undefined) break;
+            this.walk(start);
+        }
+    }
+
+    hunt(): ForestNode {
+        for (let i = 0; i < this.width; i++) {
+            for (let j = 0; j < this.height; j++) {
+                let node = this.getNode(i, j);
+                // is it unvisited?
+                if (node.connections.length === 0) {
+                    // does it have visited neighbors?
+                    let neighbors = this.getNeighbors(node);
+                    let visitedNeighbors = neighbors.filter((n) => {
+                        return n.connections.length > 0;
+                    });
+                    if (visitedNeighbors.length > 0) {
+                        let neighbor =
+                            visitedNeighbors[
+                                Phaser.Math.Between(
+                                    0,
+                                    visitedNeighbors.length - 1
+                                )
+                            ];
+
+                        this.connectNodes(node, neighbor);
+                        node.stepsFromStart = neighbor.stepsFromStart + 1;
+                        return node;
+                    }
+                }
+            }
+        }
+
+        return undefined;
+    }
+
+    walk(start: ForestNode) {
+        let here = start;
 
         while (true) {
-            let candidateNodes = this.getUnvisitedNeighbors(here, visitedNodes);
-            if (candidateNodes.length === 0){
+            let candidateNodes = this.getUnvisitedNeighbors(here);
+            if (candidateNodes.length === 0) {
+                here.flag = "poi";
                 break;
             }
 
-            let nextNode = candidateNodes[Phaser.Math.Between(0,candidateNodes.length)];
-            
-            
+            let nextNode =
+                candidateNodes[
+                    Phaser.Math.Between(0, candidateNodes.length - 1)
+                ];
+
+            nextNode.stepsFromStart = here.stepsFromStart + 1;
+
+            this.connectNodes(here, nextNode);
+
+            here = nextNode;
         }
     }
 
@@ -37,41 +129,39 @@ export class Forest {
         })[0];
     }
 
-    getUnvisitedNeighbors(here: ForestNode, visitedNodes: ForestNode[]): ForestNode[] {
-        let neighbors = this.getNeighbors(here);
+    getUnvisitedNeighbors(node: ForestNode): ForestNode[] {
+        let neighbors = this.getNeighbors(node);
 
-        let result = neighbors.filter(n => {
-            return visitedNodes.filter(v => {
-                return v.x === n.x && v.y === n.y;
-            }).length === 0;
+        let result = neighbors.filter((n) => {
+            return n.connections.length === 0;
         });
 
         return result;
     }
 
-    getNeighbors(here: ForestNode): ForestNode[] {
+    getNeighbors(node: ForestNode): ForestNode[] {
         let modifiers = [-1, 1];
         let results: ForestNode[] = [];
 
         for (let i = 0; i < modifiers.length; i++) {
-            for (let j = 0; j < modifiers.length; j++) {
-                let node = this.getNode(here.x + i, here.y + j);
-                if (node) {
-                    results.push(node);
-                }
+            let horizontalNeighbor = this.getNode(
+                node.x + modifiers[i],
+                node.y
+            );
+            if (horizontalNeighbor) {
+                results.push(horizontalNeighbor);
+            }
+            let verticalNeighbor = this.getNode(node.x, node.y + modifiers[i]);
+            if (verticalNeighbor) {
+                results.push(verticalNeighbor);
             }
         }
 
         return results;
     }
 
-    getOppositeDirection(direction: string): string {
-        let index = this.directions.indexOf(direction);
-        let opposite = index - 2;
-        if (opposite < 0) {
-            opposite += 4;
-        }
-
-        return this.directions[opposite];
+    connectNodes(firstNode: ForestNode, secondNode: ForestNode) {
+        firstNode.connections.push(secondNode);
+        secondNode.connections.push(firstNode);
     }
 }
