@@ -14,6 +14,7 @@ export const MyGameConfig: GameConfig = {
         keyboard: true
     },
     render: {
+        pixelArt: true,
         antialias: false 
     },
     scale: {

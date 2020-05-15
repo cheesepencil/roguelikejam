@@ -49,7 +49,7 @@ export class Forest {
 
                 let nextNode =
                     candidateNodes[
-                        Phaser.Math.Between(0, candidateNodes.length - 1)
+                    Phaser.Math.Between(0, candidateNodes.length - 1)
                     ];
 
                 nextNode.stepsFromStart = here.stepsFromStart + 1;
@@ -83,10 +83,10 @@ export class Forest {
                     if (visitedNeighbors.length > 0) {
                         let neighbor =
                             visitedNeighbors[
-                                Phaser.Math.Between(
-                                    0,
-                                    visitedNeighbors.length - 1
-                                )
+                            Phaser.Math.Between(
+                                0,
+                                visitedNeighbors.length - 1
+                            )
                             ];
 
                         this.connectNodes(node, neighbor);
@@ -112,7 +112,7 @@ export class Forest {
 
             let nextNode =
                 candidateNodes[
-                    Phaser.Math.Between(0, candidateNodes.length - 1)
+                Phaser.Math.Between(0, candidateNodes.length - 1)
                 ];
 
             nextNode.stepsFromStart = here.stepsFromStart + 1;
@@ -163,5 +163,61 @@ export class Forest {
     connectNodes(firstNode: ForestNode, secondNode: ForestNode) {
         firstNode.connections.push(secondNode);
         secondNode.connections.push(firstNode);
+    }
+
+    debugDrawForest(scene: Phaser.Scene) {
+        let passageSize = 5;
+        let cellSize = 15;
+        let cellColor = 0x0000ff;
+        let poiColor = 0xff0000;
+        let passageColor = 0x00dd;
+        let drawnUnitSize = cellSize + passageSize;
+        for (let i = 0; i < this.nodes.length; i++) {
+            let node = this.nodes[i];
+            if (node.connections.length === 0) continue;
+            scene.add
+                .rectangle(
+                    passageSize + node.x * drawnUnitSize,
+                    passageSize + node.y * drawnUnitSize,
+                    cellSize,
+                    cellSize,
+                    node.flag ? poiColor : cellColor
+                )
+                .setOrigin(0, 0)
+                .setAlpha(0.25);
+            scene.add
+                .text(
+                    passageSize + node.x * drawnUnitSize,
+                    passageSize + node.y * drawnUnitSize,
+                    node.stepsFromStart.toString(),
+                    { fontSize: "10px" }
+                )
+                .setOrigin(0, 0)
+                .setAlpha(0.25);
+            let undrawnConnections = node.connections.filter((c) => {
+                return c.x > node.x || c.y > node.y;
+            });
+
+            if (undrawnConnections.length === 0) {
+                continue;
+            }
+
+            for (let j = 0; j < undrawnConnections.length; j++) {
+                let neighbor = undrawnConnections[j];
+
+                let modX = neighbor.x - node.x;
+                let modY = neighbor.y - node.y;
+                scene.add
+                    .rectangle(
+                        passageSize + cellSize * modX + node.x * drawnUnitSize,
+                        passageSize + cellSize * modY + node.y * drawnUnitSize,
+                        Math.abs(modX) ? passageSize : cellSize,
+                        Math.abs(modY) ? passageSize : cellSize,
+                        passageColor
+                    )
+                    .setOrigin(0, 0)
+                    .setAlpha(0.25);
+            }
+        }
     }
 }
