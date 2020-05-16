@@ -103,7 +103,61 @@ export class Village {
                 this.groundLayer.putTileAt(DIRT[15], exitPoint.x, exitPoint.y);
 
                 // draw a path from centerpoint to exitpoint
-                
+                // bresenham line drawing algorithm GO!
+                let x0 = pathCenterPoint.x;
+                let y0 = pathCenterPoint.y;
+                const x1 = exitPoint.x;
+                const y1 = exitPoint.y;
+                const dx = Math.abs(x1 - x0);
+                const sx = x0 < x1 ? 1 : -1;
+                const dy = Math.abs(y1 - y0);
+                const sy = y0 < y1 ? 1 : -1;
+                let err = (dx > dy ? dx : -dy) / 2;
+
+                while (true) {
+                    for (let i = 0; i < 2; i++) {
+                        for (let j = 0; j < 2; j++) {
+                            this.groundLayer.putTileAt(
+                                DIRT[15],
+                                x0 + i,
+                                y0 + j
+                            );
+                        }
+                    }
+                    if (x0 === x1 && y0 === y1) break;
+                    const e2 = err;
+                    if (e2 > -dx) {
+                        err -= dy;
+                        x0 += sx;
+                    }
+                    if (e2 < dy) {
+                        err += dx;
+                        y0 += sy;
+                    }
+                }
+
+                // const startX =
+                //     pathCenterPoint.x < exitPoint.x
+                //         ? pathCenterPoint.x
+                //         : exitPoint.x;
+                // const endX =
+                //     pathCenterPoint.x > exitPoint.x
+                //         ? pathCenterPoint.x
+                //         : exitPoint.x;
+                // const startY =
+                //     pathCenterPoint.y < exitPoint.y
+                //         ? pathCenterPoint.y
+                //         : exitPoint.y;
+                // const endY =
+                //     pathCenterPoint.y > exitPoint.y
+                //         ? pathCenterPoint.y
+                //         : exitPoint.y;
+
+                // for (let i = startX; i <= endX; i++) {
+                //     for (let j = startY; j <= endY; j++) {
+                //         this.groundLayer.putTileAt(DIRT[15], i, j);
+                //     }
+                // }
             });
         });
         const wangifier = new WangManager(this.groundLayer, DIRT);

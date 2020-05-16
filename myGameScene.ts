@@ -19,7 +19,7 @@ export class MyGameScene extends Phaser.Scene {
 
         const village = new Village({
             scene: this,
-            seed: ["roguelike jam!"],
+            seed: undefined,
             width: 5,
             height: 5,
             forestNodeWidth: 36,
