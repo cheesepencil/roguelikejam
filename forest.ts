@@ -76,7 +76,7 @@ export class Forest {
         }
     }
 
-    hunt(): ForestNode {
+    private hunt(): ForestNode {
         for (let i = 0; i < this.width; i++) {
             for (let j = 0; j < this.height; j++) {
                 let node = this.getNode(i, j);
@@ -107,7 +107,7 @@ export class Forest {
         return undefined;
     }
 
-    walk(start: ForestNode): void {
+    private walk(start: ForestNode): void {
         let here = start;
         let walking = true;
 
@@ -131,13 +131,13 @@ export class Forest {
         }
     }
 
-    getNode(x: number, y: number): ForestNode {
+    private getNode(x: number, y: number): ForestNode {
         return this.nodes.filter((f) => {
             return f.x === x && f.y === y;
         })[0];
     }
 
-    getUnvisitedNeighbors(node: ForestNode): ForestNode[] {
+    private getUnvisitedNeighbors(node: ForestNode): ForestNode[] {
         let neighbors = this.getNeighbors(node);
 
         let result = neighbors.filter((n) => {
@@ -147,7 +147,7 @@ export class Forest {
         return result;
     }
 
-    getNeighbors(node: ForestNode): ForestNode[] {
+    private getNeighbors(node: ForestNode): ForestNode[] {
         let modifiers = [-1, 1];
         let results: ForestNode[] = [];
 
@@ -168,10 +168,10 @@ export class Forest {
         return results;
     }
 
-    connectNodes(firstNode: ForestNode, secondNode: ForestNode): void {
+    private connectNodes(firstNode: ForestNode, secondNode: ForestNode): void {
         const entrance = this.randomizer.between(0, 2);
-        firstNode.connections.push({node: secondNode, entrance});
-        secondNode.connections.push({node: firstNode, entrance});
+        firstNode.connections.push({ node: secondNode, entrance });
+        secondNode.connections.push({ node: firstNode, entrance });
     }
 
     debugDrawForest(scene: Phaser.Scene): void {
@@ -193,7 +193,8 @@ export class Forest {
                     node.flag ? poiColor : cellColor
                 )
                 .setOrigin(0, 0)
-                .setAlpha(0.25);
+                .setAlpha(0.25)
+                .setScrollFactor(0);
             scene.add
                 .text(
                     passageSize + node.x * drawnUnitSize,
@@ -202,7 +203,8 @@ export class Forest {
                     { fontSize: "10px" }
                 )
                 .setOrigin(0, 0)
-                .setAlpha(0.25);
+                .setAlpha(0.25)
+                .setScrollFactor(0);
             let undrawnConnections = node.connections.filter((c) => {
                 return c.node.x > node.x || c.node.y > node.y;
             });
@@ -225,7 +227,8 @@ export class Forest {
                         passageColor
                     )
                     .setOrigin(0, 0)
-                    .setAlpha(0.25);
+                    .setAlpha(0.25)
+                    .setScrollFactor(0);
             }
         }
     }

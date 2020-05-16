@@ -14,12 +14,12 @@ export class MyGameScene extends Phaser.Scene {
     }
 
     create(): void {
-        this.cameras.main.setBounds(0, 0, 36 * 16, 36 * 16);
+        //this.cameras.main.setBounds(0, 0, 36 * 16, 36 * 16);
         this.cursors = this.input.keyboard.createCursorKeys();
 
         const village = new Village({
             scene: this,
-            seed: ["test"],
+            seed: ["roguelike jam!"],
             width: 5,
             height: 5,
             forestNodeWidth: 36,

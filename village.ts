@@ -1,8 +1,14 @@
 import { Forest } from "./forest";
 import { VillageConfig } from "./villageConfig";
-import { DARK_GREEN_GRASS, DIRT, LIGHT_GREEN_GRASS } from "./tileSpriteMappings";
+import {
+    DARK_GREEN_GRASS,
+    DIRT,
+    LIGHT_GREEN_GRASS,
+} from "./tileSpriteMappings";
 import { WangManager } from "./wangManager";
 import { Dir } from "fs";
+import { ForestNode } from "./forestNode";
+import { VillageNode } from "./villageNode";
 
 export class Village {
     config: VillageConfig;
@@ -13,22 +19,111 @@ export class Village {
     groundLayer: Phaser.Tilemaps.DynamicTilemapLayer;
     forest: Forest;
     randomizer: Phaser.Math.RandomDataGenerator;
+    villageNodes: VillageNode[] = [];
 
     constructor(config: VillageConfig) {
         // props
         this.config = config;
         this.randomizer = new Phaser.Math.RandomDataGenerator(config.seed);
         this.forest = new Forest(config.width, config.height, this.randomizer);
-        const scene = config.scene;
+        this.scene = config.scene;
 
-        // tilemap init
-        this.tilemap = scene.make.tilemap({
+        this.initTilemap();
+        this.initGroundLayer();
+
+        // ground layer order!
+        // - paths
+        // - corners/borders
+        // - light grass
+
+        // begin path drawing
+        const maxOffsetX = Math.floor(this.config.forestNodeWidth / 4);
+        const maxOffsetY = Math.floor(this.config.forestNodeHeight / 4);
+        this.forest.nodes.forEach((forestNode) => {
+            // path centerpoint
+            const pathCenterPoint = new Phaser.Geom.Point(
+                forestNode.x * this.config.forestNodeWidth +
+                    this.config.forestNodeWidth / 2 +
+                    this.randomizer.between(-maxOffsetX, maxOffsetX),
+                forestNode.y * this.config.forestNodeHeight +
+                    this.config.forestNodeHeight / 2 +
+                    this.randomizer.between(-maxOffsetY, maxOffsetY)
+            );
+            const villageNode = new VillageNode(forestNode, pathCenterPoint);
+            this.villageNodes.push(villageNode);
+
+            // draw path centerpoint
+            for (let i = 0; i < 2; i++) {
+                for (let j = 0; j < 2; j++) {
+                    this.groundLayer.putTileAt(
+                        DIRT[15],
+                        pathCenterPoint.x + i,
+                        pathCenterPoint.y + j
+                    );
+                }
+            }
+
+            // lines from centerpoint to exits
+            forestNode.connections.forEach((connection) => {
+                // point is tilemap coords, not pixel coords
+                const exitPoint = new Phaser.Geom.Point(
+                    forestNode.x * config.forestNodeWidth,
+                    forestNode.y * config.forestNodeHeight
+                );
+                if (forestNode.x > connection.node.x) {
+                    // exit to the left
+                    exitPoint.y +=
+                        Math.floor(0.25 * config.forestNodeHeight) +
+                        connection.entrance *
+                            Math.floor(0.25 * config.forestNodeHeight);
+                } else if (forestNode.x < connection.node.x) {
+                    // exit to the right
+                    exitPoint.x += config.forestNodeWidth - 1;
+                    exitPoint.y +=
+                        Math.floor(0.25 * config.forestNodeHeight) +
+                        connection.entrance *
+                            Math.floor(0.25 * config.forestNodeHeight);
+                } else if (forestNode.y > connection.node.y) {
+                    //exit to the top
+                    exitPoint.x +=
+                        Math.floor(0.25 * config.forestNodeWidth) +
+                        connection.entrance *
+                            Math.floor(0.25 * config.forestNodeWidth);
+                } else if (forestNode.y < connection.node.y) {
+                    // exit to the bottom
+                    exitPoint.y += config.forestNodeHeight - 1;
+                    exitPoint.x +=
+                        Math.floor(0.25 * config.forestNodeWidth) +
+                        connection.entrance *
+                            Math.floor(0.25 * config.forestNodeWidth);
+                } else {
+                    console.log("Something has gone horribly, horribly wrong.");
+                }
+                villageNode.exitPoints.push(exitPoint);
+                this.groundLayer.putTileAt(DIRT[15], exitPoint.x, exitPoint.y);
+
+                // draw a path from centerpoint to exitpoint
+                
+            });
+        });
+        const wangifier = new WangManager(this.groundLayer, DIRT);
+        wangifier.wangify();
+
+        // end path drawing
+
+        this.initGroundBordersAndCorners();
+
+        this.forest.debugDrawForest(this.scene);
+    }
+
+    private initTilemap(): void {
+        this.tilemap = this.scene.make.tilemap({
             tileWidth: 16,
             tileHeight: 16,
-            width: config.forestNodeWidth * this.forest.width,
-            height: config.forestNodeHeight * this.forest.height,
+            width: this.config.forestNodeWidth * this.forest.width,
+            height: this.config.forestNodeHeight * this.forest.height,
         });
-        scene.add.existing(this.tilemap as any);
+        this.scene.add.existing(this.tilemap as any);
         this.tileset = this.tilemap.addTilesetImage(
             "village",
             null,
@@ -37,36 +132,62 @@ export class Village {
             0,
             0
         );
+    }
 
+    private initGroundLayer(): void {
         // groundlayer
         this.groundLayer = this.tilemap.createBlankDynamicLayer(
             "groundLayer",
             this.tileset
         );
         this.groundLayer.fill(96);
+    }
 
+    private initGroundBordersAndCorners(): void {
         const wangifier = new WangManager(this.groundLayer, DARK_GREEN_GRASS);
         this.groundLayer.forEachTile((t) => {
+            const moduloX = t.x % this.config.forestNodeWidth;
+            const moduloY = t.y % this.config.forestNodeHeight;
+            // borders
             if (
-                t.x % (config.forestNodeWidth - 1) === 0 ||
-                t.y % (config.forestNodeHeight - 1) === 0
+                moduloX === 0 ||
+                moduloX === this.config.forestNodeWidth - 1 ||
+                moduloY === 0 ||
+                moduloY === this.config.forestNodeHeight - 1
             ) {
-                t.index = DARK_GREEN_GRASS[15];
+                if (DARK_GREEN_GRASS.indexOf(t.index) > 0) {
+                    t.index = DARK_GREEN_GRASS[15];
+                }
             }
-            if (this.randomizer.between(0, 20) === 0) {
+
+            // cell corners
+            const cornerSize = Math.floor(this.config.forestNodeWidth / 2);
+            const oppositeModuloY = this.config.forestNodeHeight - moduloY;
+            const isCornerY =
+                moduloY < cornerSize || oppositeModuloY < cornerSize;
+            const cornerY = moduloY < cornerSize ? moduloY : oppositeModuloY;
+
+            const oppositeModuloX = this.config.forestNodeWidth - moduloX;
+            const isCornerX =
+                moduloX < cornerSize || oppositeModuloX < cornerSize;
+            const cornerX = moduloX < cornerSize ? moduloX : oppositeModuloX;
+            let probability = 1;
+            probability -= 0.5 - cornerX / cornerSize;
+            probability -= 0.5 - cornerY / cornerSize;
+
+            if (probability < 0) {
+                console.log(probability);
+            }
+
+            if (
+                isCornerX &&
+                isCornerY &&
+                Math.abs(cornerX + cornerY) < cornerSize * 1.5 &&
+                this.randomizer.frac() > probability / 2
+            ) {
                 wangifier.addPoints([new Phaser.Geom.Point(t.x, t.y)]);
             }
         });
         wangifier.wangify();
-
-        const wangifier2 = new WangManager(this.groundLayer, LIGHT_GREEN_GRASS);
-        this.groundLayer.forEachTile((t) => {
-            if (this.randomizer.between(0, 20) === 0) {
-                wangifier2.addPoints([new Phaser.Geom.Point(t.x, t.y)]);
-            }
-        });
-        wangifier2.wangify();
     }
-
-    private foo(): void {}
 }
