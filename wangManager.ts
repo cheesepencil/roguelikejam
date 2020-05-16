@@ -3,10 +3,14 @@ import { exists } from "fs";
 
 export class WangManager {
     spriteMapping: number[];
+    points: Phaser.Geom.Point[] = [];
     wangTiles: WangTile[] = [];
     layer: Phaser.Tilemaps.DynamicTilemapLayer;
 
-    constructor(layer: Phaser.Tilemaps.DynamicTilemapLayer, spriteMapping: number[] = undefined) {
+    constructor(
+        layer: Phaser.Tilemaps.DynamicTilemapLayer,
+        spriteMapping: number[] = undefined
+    ) {
         this.layer = layer;
         if (spriteMapping === undefined) {
             this.spriteMapping = DARK_GREEN_GRASS;
@@ -15,17 +19,41 @@ export class WangManager {
         }
     }
 
-    addPoints(points: Phaser.Geom.Point[]) {
-        points.forEach(p => {
-            this.getWang(p.x - 1, p.y - 1)?.topLeftify();
-            this.getWang(p.x, p.y - 1)?.topRightify()
-            this.getWang(p.x - 1, p.y)?.bottomLeftify();
-            this.getWang(p.x, p.y)?.bottomRightify();
+    addPoints(points: Phaser.Geom.Point[]): void {
+        points.forEach((point) => {
+            if (
+                this.isUntrackedPoint(point) &&
+                this.hasNoUnsavoryNeighbors(point)
+            )
+                this.points.push(point);
         });
     }
 
-    getWang(x: number, y: number) {
-        let wang = this.wangTiles.filter(w => {
+    private isUntrackedPoint(point: Phaser.Geom.Point): boolean {
+        return (
+            this.points.filter((p) => {
+                return p.x === point.x && p.y === point.y;
+            }).length === 0
+        );
+    }
+
+    private hasNoUnsavoryNeighbors(point: Phaser.Geom.Point): boolean {
+        for (let i = 0; i < 2; i++) {
+            for (let j = 0; j < 2; j++) {
+                if (
+                    this.spriteMapping.indexOf(
+                        this.layer.getTileAt(point.x - i, point.y - j)?.index
+                    ) < 0
+                ) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private getWang(x: number, y: number): WangTile {
+        let wang = this.wangTiles.filter((w) => {
             return w.x === x && w.y === y;
         })[0];
         if (wang) {
@@ -55,30 +83,37 @@ export class WangManager {
         }
     }
 
-    draw() {
-        this.wangTiles.forEach(w => {
+    private draw(): void {
+        this.points.forEach((p) => {
+            this.getWang(p.x - 1, p.y - 1)?.topLeftify();
+            this.getWang(p.x, p.y - 1)?.topRightify();
+            this.getWang(p.x - 1, p.y)?.bottomLeftify();
+            this.getWang(p.x, p.y)?.bottomRightify();
+        });
+        this.wangTiles.forEach((w) => {
             this.layer.putTileAt(this.spriteMapping[w.cornerBits], w.x, w.y);
         });
     }
 
-    wangify() {
+    wangify(): void {
         const solids = this.layer.filterTiles((t: Phaser.Tilemaps.Tile) => {
             return t.index === this.spriteMapping[15];
         }, this);
         const vertices: Phaser.Geom.Point[] = [];
-        solids.forEach(s => {
+        solids.forEach((s) => {
             for (let i = 0; i < 2; i++) {
                 for (let j = 0; j < 2; j++) {
                     let point = new Phaser.Geom.Point(s.x + i, s.y + j);
-                    if (vertices.filter(v => {
-                        return v.x === point.x && v.y === point.y;
-                    }).length === 0) {
+                    if (
+                        vertices.filter((v) => {
+                            return v.x === point.x && v.y === point.y;
+                        }).length === 0
+                    ) {
                         vertices.push(point);
                     }
                 }
             }
         });
-        console.log(vertices.length);
         this.addPoints(vertices);
         this.draw();
     }
@@ -95,19 +130,19 @@ class WangTile {
         this.cornerBits = cornerBits;
     }
 
-    topLeftify() {
+    topLeftify(): void {
         this.cornerBits += 2;
     }
 
-    topRightify() {
+    topRightify(): void {
         this.cornerBits += 4;
     }
 
-    bottomLeftify() {
+    bottomLeftify(): void {
         this.cornerBits += 1;
     }
 
-    bottomRightify() {
+    bottomRightify(): void {
         this.cornerBits += 8;
     }
 }

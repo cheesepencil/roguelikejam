@@ -17,6 +17,24 @@ darkGreenGrass[13] = 41;
 darkGreenGrass[14] = 9;
 darkGreenGrass[15] = 38;
 
+const lightGreenGrass: number[] = [];
+lightGreenGrass[0] = 96;
+lightGreenGrass[1] = 74 - 10;
+lightGreenGrass[2] = 10 - 10;
+lightGreenGrass[3] = 42 - 10;
+lightGreenGrass[4] = 12 - 10;
+lightGreenGrass[5] = 77 - 10;
+lightGreenGrass[6] = 11 - 10;
+lightGreenGrass[7] = 13 - 10;
+lightGreenGrass[8] = 76 - 10;
+lightGreenGrass[9] = 75 - 10;
+lightGreenGrass[10] = 78 - 10;
+lightGreenGrass[11] = 45 - 10;
+lightGreenGrass[12] = 44 - 10;
+lightGreenGrass[13] = 46 - 10;
+lightGreenGrass[14] = 14 - 10;
+lightGreenGrass[15] = 43 - 10;
+
 // map wang bits to dirt tilesprites
 const dirt: number[] = [];
 dirt[0] = 96;
@@ -37,4 +55,5 @@ dirt[14] = 14;
 dirt[15] = 43;
 
 export const DARK_GREEN_GRASS = darkGreenGrass;
+export const LIGHT_GREEN_GRASS = lightGreenGrass;
 export const DIRT = dirt;

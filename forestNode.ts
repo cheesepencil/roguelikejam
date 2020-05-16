@@ -3,7 +3,7 @@ import { Forest } from "./forest";
 export class ForestNode {
     x: number;
     y: number;
-    connections: ForestNode[];
+    connections: ForestNodeConnection[];
     stepsFromStart: number;
     flag: string;
 
@@ -13,4 +13,9 @@ export class ForestNode {
         this.stepsFromStart = stepsFromStart;
         this.connections = [];
     }
+}
+
+export class ForestNodeConnection {
+    node: ForestNode;
+    entrance: number;
 }

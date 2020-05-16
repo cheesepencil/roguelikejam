@@ -11,29 +11,29 @@ export const MyGameConfig: GameConfig = {
     type: Phaser.AUTO,
     input: {
         //gamepad: true,
-        keyboard: true
+        keyboard: true,
     },
     render: {
         pixelArt: true,
-        antialias: false 
+        antialias: false,
     },
     scale: {
-        mode: Phaser.Scale.FIT
+        mode: Phaser.Scale.FIT,
     },
-    parent: 'game-parent',
+    parent: "game-parent",
     physics: {
-        default: 'arcade',
+        default: "arcade",
         arcade: {
             //debug: true,
             gravity: { y: 0 },
-            fps: fps
-        }
+            fps: fps,
+        },
     },
-    width: 192,
-    height: 192,
+    width: 256,
+    height: 256,
     fps: {
         target: fps,
         //forceSetTimeOut: true
     },
-    scene: [MyPreloaderScene, MyLoaderScene, MyTitleScene, MyGameScene]
+    scene: [MyPreloaderScene, MyLoaderScene, MyTitleScene, MyGameScene],
 };
