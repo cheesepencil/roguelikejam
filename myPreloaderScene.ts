@@ -1,16 +1,16 @@
 export class MyPreloaderScene extends Phaser.Scene {
     constructor() {
         super({
-            key: 'MyPreloaderScene'
+            key: "MyPreloaderScene"
         });
     }
 
-    preload() {
+    preload(): void {
         //this.load.image('village', require('./assets/village.png'));
-        this.load.image('village', require('./assets/village.png'));
+        this.load.image("village", require("./assets/village.png"));
     }
 
-    create() {
-        this.scene.start('MyLoaderScene');
+    create(): void {
+        this.scene.start("MyLoaderScene");
     }
 }
