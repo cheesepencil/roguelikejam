@@ -6,15 +6,11 @@ export class Forest {
     nodes: ForestNode[];
     randomizer: Phaser.Math.RandomDataGenerator;
 
-    constructor(
-        width: number,
-        height: number,
-        randomizer: Phaser.Math.RandomDataGenerator
-    ) {
+    constructor(width: number, height: number, seed: string[]) {
         this.nodes = [];
         this.width = width;
         this.height = height;
-        this.randomizer = randomizer;
+        this.randomizer = new Phaser.Math.RandomDataGenerator(seed);
 
         /** build initial array of unconnected cells */
         for (let i = 0; i < width; i++) {

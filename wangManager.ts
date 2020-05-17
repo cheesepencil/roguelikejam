@@ -1,17 +1,30 @@
 import { DARK_GREEN_GRASS } from "./tileSpriteMappings";
 import { exists } from "fs";
+import { Tilemaps } from "phaser";
 
 export class WangManager {
     spriteMapping: number[];
     points: Phaser.Geom.Point[] = [];
     wangTiles: WangTile[] = [];
     layer: Phaser.Tilemaps.DynamicTilemapLayer;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
 
     constructor(
         layer: Phaser.Tilemaps.DynamicTilemapLayer,
-        spriteMapping: number[] = undefined
+        spriteMapping: number[] = undefined,
+        x: number,
+        y: number,
+        width: number,
+        height: number
     ) {
         this.layer = layer;
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
         if (spriteMapping === undefined) {
             this.spriteMapping = DARK_GREEN_GRASS;
         } else {
@@ -23,7 +36,11 @@ export class WangManager {
         points.forEach((point) => {
             if (
                 this.isUntrackedPoint(point) &&
-                this.hasNoUnsavoryNeighbors(point)
+                this.hasNoUnsavoryNeighbors(point) &&
+                point.x !== this.x &&
+                point.y !== this.y &&
+                point.x !== this.x + this.width &&
+                point.y !== this.y + this.height
             )
                 this.points.push(point);
         });
@@ -96,9 +113,15 @@ export class WangManager {
     }
 
     wangify(): void {
-        const solids = this.layer.filterTiles((t: Phaser.Tilemaps.Tile) => {
-            return t.index === this.spriteMapping[15];
-        }, this);
+        const solids = this.layer.filterTiles(
+            (t: Tilemaps.Tile) => t.index === this.spriteMapping[15],
+            null,
+            this.x,
+            this.y,
+            this.width,
+            this.height
+        );
+        console.log(`solids.length: ${solids.length}`);
         const vertices: Phaser.Geom.Point[] = [];
         solids.forEach((s) => {
             for (let i = 0; i < 2; i++) {
@@ -107,7 +130,11 @@ export class WangManager {
                     if (
                         vertices.filter((v) => {
                             return v.x === point.x && v.y === point.y;
-                        }).length === 0
+                        }).length === 0 &&
+                        point.x !== this.x &&
+                        point.y !== this.y &&
+                        point.x !== this.x + this.width &&
+                        point.y !== this.y + this.width
                     ) {
                         vertices.push(point);
                     }

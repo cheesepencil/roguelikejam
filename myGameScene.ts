@@ -21,11 +21,11 @@ export class MyGameScene extends Phaser.Scene {
 
         const village = new Village({
             scene: this,
-            seed: undefined,
+            seed: [new Date().toString()],
             width: 5,
             height: 5,
             forestNodeWidth: 36,
-            forestNodeHeight: 36
+            forestNodeHeight: 36,
         });
 
         const playerX =
@@ -40,8 +40,8 @@ export class MyGameScene extends Phaser.Scene {
             16;
 
         this.player = this.add.sprite(playerX, playerY, "dude");
-        //this.cameras.main.startFollow(this.player);
-        //this.cameras.main.setLerp(0.5);
+        this.following = true;
+        this.cameras.main.startFollow(this.player, true, 0.1, 0.1).setZoom(0.25);
         this.scene.stop("MyVillageCreationScene");
     }
 

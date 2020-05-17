@@ -2,7 +2,6 @@ import { MyPreloaderScene } from "./myPreloaderScene";
 import { MyLoaderScene } from "./myLoaderScene";
 import { MyTitleScene } from "./myTitleScene";
 import { MyGameScene } from "./myGameScene";
-import { MyVillageCreationScene } from "./myVillageCreationScene";
 
 type GameConfig = Phaser.Types.Core.GameConfig;
 
@@ -16,10 +15,10 @@ export const MyGameConfig: GameConfig = {
     },
     render: {
         pixelArt: true,
-        antialias: false
+        antialias: false,
     },
     scale: {
-        mode: Phaser.Scale.ZOOM_2X,
+        mode: Phaser.Scale.FIT,
     },
     parent: "game-parent",
     physics: {
@@ -36,11 +35,5 @@ export const MyGameConfig: GameConfig = {
         target: fps,
         //forceSetTimeOut: true
     },
-    scene: [
-        MyPreloaderScene,
-        MyLoaderScene,
-        MyTitleScene,
-        MyVillageCreationScene,
-        MyGameScene,
-    ],
+    scene: [MyPreloaderScene, MyLoaderScene, MyTitleScene, MyGameScene],
 };
