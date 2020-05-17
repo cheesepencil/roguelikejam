@@ -1,7 +1,7 @@
 export class MyLoaderScene extends Phaser.Scene {
     constructor() {
         super({
-            key: "MyLoaderScene",
+            key: "MyLoaderScene"
         });
     }
 
