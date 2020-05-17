@@ -2,6 +2,7 @@ import { MyPreloaderScene } from "./myPreloaderScene";
 import { MyLoaderScene } from "./myLoaderScene";
 import { MyTitleScene } from "./myTitleScene";
 import { MyGameScene } from "./myGameScene";
+import { MyVillageCreationScene } from "./myVillageCreationScene";
 
 type GameConfig = Phaser.Types.Core.GameConfig;
 
@@ -35,5 +36,11 @@ export const MyGameConfig: GameConfig = {
         target: fps,
         //forceSetTimeOut: true
     },
-    scene: [MyPreloaderScene, MyLoaderScene, MyTitleScene, MyGameScene],
+    scene: [
+        MyPreloaderScene,
+        MyLoaderScene,
+        MyTitleScene,
+        MyVillageCreationScene,
+        MyGameScene,
+    ],
 };

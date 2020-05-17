@@ -14,17 +14,19 @@ export class MyGameScene extends Phaser.Scene {
     }
 
     create(): void {
-        //this.cameras.main.setBounds(0, 0, 36 * 16, 36 * 16);
         this.cursors = this.input.keyboard.createCursorKeys();
-
-        const village = new Village({
-            scene: this,
-            seed: undefined,
-            width: 5,
-            height: 5,
-            forestNodeWidth: 36,
-            forestNodeHeight: 36,
+        const ready = new Promise<boolean>((resolve, reject) => {
+            resolve(true);
+            const village = new Village({
+                scene: this,
+                seed: undefined,
+                width: 5,
+                height: 5,
+                forestNodeWidth: 48,
+                forestNodeHeight: 48,
+            });
         });
+        this.scene.stop("MyVillageCreationScene");
     }
 
     update(time: number, delta: number): void {

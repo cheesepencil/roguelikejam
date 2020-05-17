@@ -10,6 +10,7 @@ export class MyTitleScene extends Phaser.Scene {
     }
 
     create(): void {
-        this.scene.start("MyGameScene");
+        this.add.text(0,0,"title");
+        this.scene.start("MyVillageCreationScene");
     }
 }

@@ -17,6 +17,10 @@ export class Village {
     tileset: Phaser.Tilemaps.Tileset;
     tilemap: Phaser.Tilemaps.Tilemap;
     groundLayer: Phaser.Tilemaps.DynamicTilemapLayer;
+    treeBaseLayer: Phaser.Tilemaps.DynamicTilemapLayer;
+    treetopLayer1: Phaser.Tilemaps.DynamicTilemapLayer;
+    treetopLayer2: Phaser.Tilemaps.DynamicTilemapLayer;
+    treetopLayer3: Phaser.Tilemaps.DynamicTilemapLayer;
     forest: Forest;
     randomizer: Phaser.Math.RandomDataGenerator;
     villageNodes: VillageNode[] = [];
@@ -28,15 +32,14 @@ export class Village {
         this.forest = new Forest(config.width, config.height, this.randomizer);
         this.scene = config.scene;
 
+        // base ground layer
         this.initTilemap();
         this.initGroundLayer();
         this.drawPaths();
-        // ground layer order!
-        // - paths
-        // - corners/borders
-        // - light grass
-
         this.initGroundBordersAndCorners();
+        this.lightGrass();
+
+        this.treeWalls();
 
         this.forest.debugDrawForest(this.scene);
     }
@@ -235,5 +238,88 @@ export class Village {
         });
         const wangifier = new WangManager(this.groundLayer, DIRT);
         wangifier.wangify();
+    }
+
+    private lightGrass(): void {
+        const wangifier = new WangManager(this.groundLayer, LIGHT_GREEN_GRASS);
+        for (let i = 0; i <= this.tilemap.width; i++) {
+            for (let j = 0; j <= this.tilemap.height; j++) {
+                if (this.randomizer.between(0, 5) === 0) {
+                    wangifier.addPoints([new Phaser.Geom.Point(i, j)]);
+                }
+            }
+        }
+        wangifier.wangify();
+    }
+
+    private treeWalls(): void {
+        this.treeBaseLayer = this.tilemap.createBlankDynamicLayer(
+            "treeBaseLayer",
+            this.tileset
+        );
+        this.treetopLayer1 = this.tilemap.createBlankDynamicLayer(
+            "treetopLayer1",
+            this.tileset
+        );
+        this.treetopLayer2 = this.tilemap.createBlankDynamicLayer(
+            "treetopLayer2",
+            this.tileset
+        );
+        this.treetopLayer3 = this.tilemap.createBlankDynamicLayer(
+            "treetopLayer3",
+            this.tileset
+        );
+        this.treeBaseLayer.forEachTile((t) => {
+            const moduloX = t.x % this.config.forestNodeWidth;
+            const moduloY = t.y % this.config.forestNodeHeight;
+            if (
+                ((moduloX === 0 && t.y % 3 === 0) ||
+                    (moduloX === 1 && (t.y + 1) % 3 === 0) ||
+                    (moduloX === this.config.forestNodeWidth - 1 &&
+                        (t.y - 1) % 3 === 0) ||
+                    (moduloY === 0 && t.x % 3 === 0) ||
+                    (moduloY === 1 && (t.x + 1) % 3 === 0) ||
+                    (moduloY === this.config.forestNodeHeight - 1 &&
+                        (t.x - 1) % 3 === 0)) &&
+                DIRT.indexOf(this.groundLayer.getTileAt(t.x, t.y).index) > 0 ===
+                    false
+            ) {
+                this.treetopLayer1.putTileAt(640, t.x - 1, t.y);
+                this.treetopLayer1.putTileAt(641, t.x, t.y);
+                this.treetopLayer1.putTileAt(642, t.x + 1, t.y);
+                const treeFlavor = this.randomizer.between(0, 1);
+                this.treetopLayer2.putTileAt(
+                    544 + treeFlavor * 64,
+                    t.x - 1,
+                    t.y - 1
+                );
+                this.treetopLayer2.putTileAt(
+                    545 + treeFlavor * 64,
+                    t.x,
+                    t.y - 1
+                );
+                this.treetopLayer2.putTileAt(
+                    546 + treeFlavor * 64,
+                    t.x + 1,
+                    t.y - 1
+                );
+                this.treetopLayer3.putTileAt(
+                    512 + treeFlavor * 64,
+                    t.x - 1,
+                    t.y - 2
+                );
+                this.treetopLayer3.putTileAt(
+                    513 + treeFlavor * 64,
+                    t.x,
+                    t.y - 2
+                );
+                this.treetopLayer3.putTileAt(
+                    514 + treeFlavor * 64,
+                    t.x + 1,
+                    t.y - 2
+                );
+                t.index = 480;
+            }
+        });
     }
 }
