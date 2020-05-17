@@ -209,13 +209,8 @@ export class Village {
                 const sy = y0 < y1 ? 1 : -1;
                 let err = (dx > dy ? dx : -dy) / 2;
 
-<<<<<<< HEAD
-                // eslint-disable-next-line no-constant-condition
-                while (true) {
-=======
                 const drawing = true;
                 while (drawing) {
->>>>>>> upstream/master
                     for (let i = 0; i < 2; i++) {
                         for (let j = 0; j < 2; j++) {
                             this.groundLayer.putTileAt(
