@@ -16,10 +16,10 @@ export const MyGameConfig: GameConfig = {
     },
     render: {
         pixelArt: true,
-        antialias: false,
+        antialias: false
     },
     scale: {
-        mode: Phaser.Scale.FIT,
+        mode: Phaser.Scale.ZOOM_2X,
     },
     parent: "game-parent",
     physics: {
