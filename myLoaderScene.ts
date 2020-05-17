@@ -5,11 +5,11 @@ export class MyLoaderScene extends Phaser.Scene {
         });
     }
 
-    preload() {
+    preload(): void {
         //this.load.image('loading', require('./assets/loading.png'));
     }
 
-    create() {
+    create(): void {
         this.scene.start("MyTitleScene");
     }
 }

@@ -5,12 +5,12 @@ export class MyPreloaderScene extends Phaser.Scene {
         });
     }
 
-    preload() {
+    preload(): void {
         //this.load.image('village', require('./assets/village.png'));
         this.load.image("village", require("./assets/village.png"));
     }
 
-    create() {
+    create(): void {
         this.scene.start("MyLoaderScene");
     }
 }
