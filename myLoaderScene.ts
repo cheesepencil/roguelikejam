@@ -1,7 +1,7 @@
 export class MyLoaderScene extends Phaser.Scene {
     constructor() {
         super({
-            key: 'MyLoaderScene'
+            key: "MyLoaderScene"
         });
     }
 
@@ -10,6 +10,6 @@ export class MyLoaderScene extends Phaser.Scene {
     }
 
     create() {
-        this.scene.start('MyTitleScene');
+        this.scene.start("MyTitleScene");
     }
 }

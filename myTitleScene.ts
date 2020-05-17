@@ -1,7 +1,7 @@
 export class MyTitleScene extends Phaser.Scene {
     constructor() {
         super({
-            key: 'MyTitleScene'
+            key: "MyTitleScene"
         });
     }
 
@@ -10,6 +10,6 @@ export class MyTitleScene extends Phaser.Scene {
     }
 
     create() {
-        this.scene.start('MyGameScene');
+        this.scene.start("MyGameScene");
     }
 }
