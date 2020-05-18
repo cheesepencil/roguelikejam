@@ -67,6 +67,12 @@ export class MyGameScene extends Phaser.Scene {
             .setScrollFactor(0);
         this.following = true;
         this.cameras.main.startFollow(this.player, true, 0.1, 0.1).setZoom(1);
+        this.cameras.main.setBounds(
+            2 * this.village.config.forestNodeWidth * 16,
+            2 * this.village.config.forestNodeHeight * 16,
+            this.village.config.forestNodeWidth * 16,
+            this.village.config.forestNodeHeight * 16
+        );
         this.scene.stop("MyVillageCreationScene");
     }
 
@@ -149,6 +155,12 @@ export class MyGameScene extends Phaser.Scene {
             ) {
                 this.village.drawNode(villageNodeX, villageNodeY);
             }
+            this.cameras.main.setBounds(
+                villageNodeX * this.village.config.forestNodeWidth * 16,
+                villageNodeY * this.village.config.forestNodeHeight * 16,
+                this.village.config.forestNodeWidth * 16,
+                this.village.config.forestNodeHeight * 16
+            );
         }
     }
 
