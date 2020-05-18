@@ -1,5 +1,5 @@
 import { Forest } from "./forest";
-import { GameObjects } from "phaser";
+import { GameObjects, Tilemaps } from "phaser";
 import { WangManager } from "./wangManager";
 import { DIRT, DARK_GREEN_GRASS } from "./tileSpriteMappings";
 import { Village } from "./village";
@@ -9,6 +9,9 @@ export class MyGameScene extends Phaser.Scene {
     player: Phaser.GameObjects.Sprite;
     following: boolean = false;
     cool: boolean = true;
+    currentTile: Tilemaps.Tile;
+    currentTileText: GameObjects.Text;
+    village: Village;
 
     constructor() {
         super({
@@ -19,9 +22,9 @@ export class MyGameScene extends Phaser.Scene {
     create(): void {
         this.cursors = this.input.keyboard.createCursorKeys();
 
-        const village = new Village({
+        this.village = new Village({
             scene: this,
-            seed: [new Date().toString()],
+            seed: ["debug"],
             width: 5,
             height: 5,
             forestNodeWidth: 36,
@@ -29,51 +32,70 @@ export class MyGameScene extends Phaser.Scene {
         });
 
         const playerX =
-            (Math.floor(village.config.width / 2) *
-                village.config.forestNodeWidth +
-                Math.floor(village.config.forestNodeWidth / 2)) *
+            (Math.floor(this.village.config.width / 2) *
+                this.village.config.forestNodeWidth +
+                Math.floor(this.village.config.forestNodeWidth / 2)) *
             16;
         const playerY =
-            (Math.floor(village.config.height / 2) *
-                village.config.forestNodeHeight +
-                Math.floor(village.config.forestNodeHeight / 2)) *
+            (Math.floor(this.village.config.height / 2) *
+                this.village.config.forestNodeHeight +
+                Math.floor(this.village.config.forestNodeHeight / 2)) *
             16;
 
-        this.player = this.add.sprite(playerX, playerY, "dude");
+        this.player = this.add
+            .sprite(
+                Math.floor(
+                    (this.village.config.width / 2) *
+                        this.village.config.forestNodeWidth *
+                        16
+                ),
+                Math.floor(
+                    (this.village.config.height / 2) *
+                        this.village.config.forestNodeHeight *
+                        16
+                ),
+                "dude"
+            )
+            .setOrigin(0, 0);
+        this.currentTile = this.village.tilemap.getTileAtWorldXY(
+            this.player.x,
+            this.player.y
+        );
+        this.currentTileText = this.add
+            .text(256, 256, `(${this.currentTile?.x}, ${this.currentTile?.y})`)
+            .setOrigin(1, 1)
+            .setScrollFactor(0);
         this.following = true;
-        this.cameras.main.startFollow(this.player, true, 0.1, 0.1).setZoom(0.25);
+        this.cameras.main.startFollow(this.player, true, 0.1, 0.1).setZoom(1);
         this.scene.stop("MyVillageCreationScene");
     }
 
     update(time: number, delta: number): void {
         if (this.following) {
-            if (this.cursors.up.isDown) {
-                this.player.y -= 0.125 * delta;
-            }
-            if (this.cursors.down.isDown) {
-                this.player.y += 0.125 * delta;
-            }
-            if (this.cursors.right.isDown) {
-                this.player.x += 0.125 * delta;
-            }
-            if (this.cursors.left.isDown) {
-                this.player.x -= 0.125 * delta;
-            }
-            if (this.cursors.shift.isDown) {
-                if (this.cool) {
+            if (this.cool) {
+                if (this.cursors.up.isDown) {
+                    this.player.y -= 16;
+                }
+                if (this.cursors.down.isDown) {
+                    this.player.y += 16;
+                }
+                if (this.cursors.right.isDown) {
+                    this.player.x += 16;
+                }
+                if (this.cursors.left.isDown) {
+                    this.player.x -= 16;
+                }
+                if (this.cursors.shift.isDown) {
                     this.cameras.main.zoom =
-                        this.cameras.main.zoom === 1
+                        this.cameras.main.zoom != 0.25
                             ? (this.cameras.main.zoom = 0.25)
                             : (this.cameras.main.zoom = 1);
-                    this.cooldown();
                 }
-            }
-            if (this.cursors.space.isDown) {
-                if (this.cool) {
+                if (this.cursors.space.isDown) {
                     this.following = false;
                     this.cameras.main.stopFollow();
-                    this.cooldown();
                 }
+                this.cooldown();
             }
         } else {
             if (this.cursors.up.isDown) {
@@ -105,12 +127,35 @@ export class MyGameScene extends Phaser.Scene {
                 }
             }
         }
+
+        const currentTile = this.village.tilemap
+            .setLayer("groundLayer")
+            .getTileAtWorldXY(this.player.x, this.player.y);
+        const villageNodeX = Math.floor(
+            currentTile.x / this.village.config.forestNodeWidth
+        );
+        const villageNodeY = Math.floor(
+            currentTile.y / this.village.config.forestNodeHeight
+        );
+        if (currentTile && currentTile !== this.currentTile) {
+            this.currentTile = currentTile;
+            this.currentTileText.setText(
+                `Tile: (${currentTile.x}, ${currentTile.y})\nNode: (${villageNodeX}, ${villageNodeY})`
+            );
+            if (
+                this.village.villageNodes.filter(
+                    (n) => n.x === villageNodeX && n.y === villageNodeY
+                ).length === 0
+            ) {
+                this.village.drawNode(villageNodeX, villageNodeY);
+            }
+        }
     }
 
     private cooldown(): void {
         this.cool = false;
         this.time.delayedCall(
-            500,
+            150,
             () => {
                 this.cool = true;
             },

@@ -29,31 +29,21 @@ export class Village {
         this.config = config;
         this.forest = new Forest(config.width, config.height, config.seed);
         this.scene = config.scene;
-
-        // init tilemap and layers
         this.initTilemap();
 
-        // draw a forestNode
-        // this.drawNode(0, 0);
-        // this.drawNode(
-        //     Math.floor(config.width / 2),
-        //     Math.floor(config.height / 2)
-        // );
-        
-        for (let i = 0; i < this.config.width; i++){
-            for (let j =0; j< this.config.height; j++){
-                this.drawNode(i, j);
-            }
-        }
+        this.drawNode(
+            Math.floor(config.width / 2),
+            Math.floor(config.height / 2)
+        );
 
         this.forest.debugDrawForest(this.scene);
     }
 
     drawNode(x: number, y: number): void {
         this.drawPaths(x, y);
-        //this.initGroundBordersAndCorners(x, y);
-        //this.lightGrass(x, y);
-        //this.treeWalls(x, y);
+        this.initGroundBordersAndCorners(x, y);
+        this.lightGrass(x, y);
+        this.treeWalls(x, y);
     }
 
     private initTilemap(): void {
@@ -104,9 +94,6 @@ export class Village {
         const startTileY = y * this.config.forestNodeHeight;
         const nodeWidth = this.config.forestNodeWidth;
         const nodeHeight = this.config.forestNodeHeight;
-        console.log(
-            `before (${startTileX}, ${startTileY}, ${nodeWidth}, ${nodeHeight})`
-        );
         const wangifier = new WangManager(
             this.groundLayer,
             DARK_GREEN_GRASS,
@@ -283,6 +270,12 @@ export class Village {
                 for (let i = 0; i < 2; i++) {
                     for (let j = 0; j < 2; j++) {
                         this.groundLayer.putTileAt(DIRT[15], x0 + i, y0 + j);
+                        this.clobberNearby(
+                            x0 + i,
+                            y0 + j,
+                            this.groundLayer,
+                            DIRT
+                        );
                     }
                 }
                 if (x0 === x1 && y0 === y1) break;
@@ -302,10 +295,27 @@ export class Village {
             DIRT,
             x * this.config.forestNodeWidth,
             y * this.config.forestNodeHeight,
-            this.config.forestNodeWidth + 1,
-            this.config.forestNodeHeight + 1
+            this.config.forestNodeWidth,
+            this.config.forestNodeHeight
         );
         wangifier.wangify();
+    }
+
+    private clobberNearby(
+        x: number,
+        y: number,
+        layer: Phaser.Tilemaps.DynamicTilemapLayer,
+        spriteMapping: number[]
+    ): void {
+        for (let i = -2; i < 3; i++) {
+            for (let j = -2; j < 3; j++) {
+                if (i === 0 && j === 0) continue;
+                const tile = layer.getTileAt(x + i, y + j);
+                if (tile && spriteMapping.indexOf(tile.index) < 15) {
+                    tile.index = spriteMapping[0];
+                }
+            }
+        }
     }
 
     private lightGrass(x: number, y: number): void {

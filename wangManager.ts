@@ -1,6 +1,7 @@
 import { DARK_GREEN_GRASS } from "./tileSpriteMappings";
 import { exists } from "fs";
 import { Tilemaps } from "phaser";
+import { BADFAMILY } from "dns";
 
 export class WangManager {
     spriteMapping: number[];
@@ -46,6 +47,19 @@ export class WangManager {
         });
     }
 
+    private resetNearby(x: number, y: number): void {
+        for (let i = 0; i < 2; i++) {
+            for (let j = 0; j < 2; j++) {
+                const tile = this.layer.getTileAt(x - i, y - j);
+                const index = this.spriteMapping.indexOf(tile?.index);
+                if (index < 15 && index > 0) {
+                    tile.index = this.spriteMapping[0];
+                    this.points.push(new Phaser.Geom.Point(tile.x, tile.y));
+                }
+            }
+        }
+    }
+
     private isUntrackedPoint(point: Phaser.Geom.Point): boolean {
         return (
             this.points.filter((p) => {
@@ -57,11 +71,10 @@ export class WangManager {
     private hasNoUnsavoryNeighbors(point: Phaser.Geom.Point): boolean {
         for (let i = 0; i < 2; i++) {
             for (let j = 0; j < 2; j++) {
-                if (
-                    this.spriteMapping.indexOf(
-                        this.layer.getTileAt(point.x - i, point.y - j)?.index
-                    ) < 0
-                ) {
+                const index = this.spriteMapping.indexOf(
+                    this.layer.getTileAt(point.x - i, point.y - j)?.index
+                );
+                if (index < 0) {
                     return false;
                 }
             }
@@ -100,18 +113,6 @@ export class WangManager {
         }
     }
 
-    private draw(): void {
-        this.points.forEach((p) => {
-            this.getWang(p.x - 1, p.y - 1)?.topLeftify();
-            this.getWang(p.x, p.y - 1)?.topRightify();
-            this.getWang(p.x - 1, p.y)?.bottomLeftify();
-            this.getWang(p.x, p.y)?.bottomRightify();
-        });
-        this.wangTiles.forEach((w) => {
-            this.layer.putTileAt(this.spriteMapping[w.cornerBits], w.x, w.y);
-        });
-    }
-
     wangify(): void {
         const solids = this.layer.filterTiles(
             (t: Tilemaps.Tile) => t.index === this.spriteMapping[15],
@@ -121,7 +122,6 @@ export class WangManager {
             this.width,
             this.height
         );
-        console.log(`solids.length: ${solids.length}`);
         const vertices: Phaser.Geom.Point[] = [];
         solids.forEach((s) => {
             for (let i = 0; i < 2; i++) {
@@ -143,6 +143,121 @@ export class WangManager {
         });
         this.addPoints(vertices);
         this.draw();
+    }
+
+    private draw(): void {
+        this.points.forEach((p) => {
+            this.getWang(p.x - 1, p.y - 1)?.topLeftify();
+            this.getWang(p.x, p.y - 1)?.topRightify();
+            this.getWang(p.x - 1, p.y)?.bottomLeftify();
+            this.getWang(p.x, p.y)?.bottomRightify();
+        });
+        this.wangTiles.forEach((w) => {
+            if (w.x <= this.x || w.x > this.x + this.width) return;
+            if (w.y <= this.y || w.y > this.y + this.height) return;
+            this.layer.putTileAt(this.spriteMapping[w.cornerBits], w.x, w.y);
+        });
+        this.fixEdges();
+    }
+
+    private fixEdges(): void {
+        for (let i = this.x - 2; i < this.x + this.width + 3; i++) {
+            for (let j = this.y - 2; j < this.y + this.height + 3; j++) {
+                if (
+                    i > this.x + 1 &&
+                    i < this.x + this.width - 1 &&
+                    j > this.y + 1 &&
+                    j < this.y + this.height - 1
+                ) {
+                    continue;
+                }
+                const edge = this.layer.getTileAt(i, j);
+                // don't calculate "solids" or other wang mappings
+                if (
+                    !edge ||
+                    edge.index === this.spriteMapping[15] ||
+                    this.spriteMapping.indexOf(edge.index) < 0
+                ) {
+                    continue;
+                }
+                const index = this.calculateWangIndex(i, j);
+                edge.index = index;
+            }
+        }
+    }
+
+    private calculateWangIndex(x: number, y: number): number {
+        let bits = 0;
+        let nw = false;
+        let ne = false;
+        let sw = false;
+        let se = false;
+        // inefficient but i'm tired
+        for (let i = -1; i < 2; i++) {
+            for (let j = -1; j < 2; j++) {
+                if (i === 0 && j === 0) continue;
+                const neighbor = this.layer.getTileAt(x + i, y + j);
+                if (!neighbor) continue;
+                // solids... ez
+                if (this.spriteMapping.indexOf(neighbor.index) === 15) {
+                    if (i === 0 && j === -1) {
+                        ne = true;
+                        nw = true;
+                    }
+                    if (i === 0 && j === 1) {
+                        se = true;
+                        sw = true;
+                    }
+                    if (i === -1 && j === 0) {
+                        nw = true;
+                        sw = true;
+                    }
+                    if (i === 1 && j === 0) {
+                        ne = true;
+                        se = true;
+                    }
+                }
+                // not solids... annoying. wish i knew better way to do this
+                if (
+                    i === -1 &&
+                    j === -1 &&
+                    [2, 3, 6, 7, 10, 11, 14, 15].indexOf(
+                        this.spriteMapping.indexOf(neighbor.index)
+                    ) >= 0
+                ) {
+                    nw = true;
+                }
+                if (
+                    i === 1 &&
+                    j === -1 &&
+                    [4, 5, 6, 7, 12, 13, 14, 15].indexOf(
+                        this.spriteMapping.indexOf(neighbor.index)
+                    ) >= 0
+                ) {
+                    ne = true;
+                }
+                if (
+                    i === 1 &&
+                    j === 1 &&
+                    [8, 9, 10, 11, 12, 13, 14, 15].indexOf(
+                        this.spriteMapping.indexOf(neighbor.index)
+                    ) >= 0
+                ) {
+                    se = true;
+                }
+                if (
+                    i === -1 &&
+                    j === 1 &&
+                    [1, 3, 5, 7, 9, 11, 13, 15].indexOf(
+                        this.spriteMapping.indexOf(neighbor.index)
+                    ) >= 0
+                ) {
+                    sw = true;
+                }
+            }
+        }
+        bits = (ne ? 1 : 0) + (nw ? 8 : 0) + (se ? 2 : 0) + (sw ? 4 : 0);
+        return this.spriteMapping[bits];
     }
 }
 
