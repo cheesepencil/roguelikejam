@@ -10,16 +10,7 @@ Without a bountiful market, the villagers won't survive the coming winter - and 
 
 * **Dialogue**: Learn the lord's greivances from their own mouths, and discover their omissions and clues to making peace by conversing with their subjects.
 * **Fetch Quests**: Much of the conflict between lords is related to missing, misplaced, destroyed, or stolen persons and property. Find and return them to resolve disputes!
-* **Race Against the Clock**: Winter waits for no one. The conclusion of the story depends on who comes to the market. 
-
-## Wishlist
-
-* day/night cycle
-* map that updates as you explore
-* a Jack-Frost-but-not-Jack-Frost character that makes his way across the map towards the crossroads. When he arrives, winter is here, and the game ends... better hope you have the lords on board before then!
-* a "living" village with a cast of randomly generated characters to talk to 
-* roaming knights to capture you and waste your time
-* dungeons to escape from after you're captured
+* **Race Against the Clock**: Winter waits for no one. The conclusion of the story depends on who comes to the market.
 
 ## Game Jams
 

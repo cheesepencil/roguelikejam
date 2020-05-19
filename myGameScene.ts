@@ -11,7 +11,9 @@ export class MyGameScene extends Phaser.Scene {
     cool: boolean = true;
     currentTile: Tilemaps.Tile;
     currentTileText: GameObjects.Text;
+    currentNode: Phaser.Geom.Point;
     village: Village;
+    panning: boolean = false;
 
     constructor() {
         super({
@@ -48,7 +50,8 @@ export class MyGameScene extends Phaser.Scene {
                     (this.village.config.width / 2) *
                         this.village.config.forestNodeWidth *
                         16
-                ),
+                ) +
+                    16 * 12,
                 Math.floor(
                     (this.village.config.height / 2) *
                         this.village.config.forestNodeHeight *
@@ -78,7 +81,7 @@ export class MyGameScene extends Phaser.Scene {
 
     update(time: number, delta: number): void {
         if (this.following) {
-            if (this.cool) {
+            if (this.cool && this.panning === false) {
                 if (this.cursors.up.isDown) {
                     this.player.y -= 16;
                 }
@@ -155,11 +158,61 @@ export class MyGameScene extends Phaser.Scene {
             ) {
                 this.village.drawNode(villageNodeX, villageNodeY);
             }
-            this.cameras.main.setBounds(
-                villageNodeX * this.village.config.forestNodeWidth * 16,
-                villageNodeY * this.village.config.forestNodeHeight * 16,
-                this.village.config.forestNodeWidth * 16,
-                this.village.config.forestNodeHeight * 16
+            if (
+                !!this.currentNode &&
+                (this.currentNode?.x !== villageNodeX ||
+                    this.currentNode?.y !== villageNodeY)
+            ) {
+                const diffX = villageNodeX - this.currentNode.x;
+                const diffY = villageNodeY - this.currentNode.y;
+                const bounds = this.cameras.main.getBounds();
+                this.cameras.main.setBounds(
+                    bounds.x -
+                        Math.abs(diffX) *
+                            Math.floor(
+                                (this.village.config.forestNodeWidth * 16) / 2
+                            ),
+                    bounds.y -
+                        Math.abs(diffY) *
+                            Math.floor(
+                                (this.village.config.forestNodeHeight * 16) / 2
+                            ),
+                    bounds.width + bounds.width * Math.abs(diffX),
+                    bounds.height + bounds.height * Math.abs(diffY)
+                );
+                this.panning = true;
+                this.cameras.main.pan(
+                    this.player.x +
+                        Math.ceil(this.cameras.main.width / 2) *
+                            (villageNodeX - this.currentNode.x) +
+                        (diffX > 0 || Math.abs(diffY) > 0 ? 0 : 16),
+                    this.player.y +
+                        Math.ceil(this.cameras.main.height / 2) *
+                            (villageNodeY - this.currentNode.y) +
+                        (diffY > 0 || Math.abs(diffX) > 0 ? 0 : 16),
+                    500,
+                    Phaser.Math.Easing.Linear,
+                    false,
+                    (camera, progress) => {
+                        if (progress === 1) {
+                            this.panning = false;
+                            this.cameras.main.setBounds(
+                                villageNodeX *
+                                    this.village.config.forestNodeWidth *
+                                    16,
+                                villageNodeY *
+                                    this.village.config.forestNodeHeight *
+                                    16,
+                                this.village.config.forestNodeWidth * 16,
+                                this.village.config.forestNodeHeight * 16
+                            );
+                        }
+                    }
+                );
+            }
+            this.currentNode = new Phaser.Geom.Point(
+                villageNodeX,
+                villageNodeY
             );
         }
     }
