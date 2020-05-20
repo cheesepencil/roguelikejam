@@ -9,6 +9,7 @@ import { WangManager } from "./wangManager";
 import { Dir } from "fs";
 import { ForestNode } from "./forestNode";
 import { VillageNode } from "./villageNode";
+import { World } from "matter";
 
 export class Village {
     config: VillageConfig;
@@ -18,9 +19,6 @@ export class Village {
     tilemap: Phaser.Tilemaps.Tilemap;
     groundLayer: Phaser.Tilemaps.DynamicTilemapLayer;
     treeBaseLayer: Phaser.Tilemaps.DynamicTilemapLayer;
-    treetopLayer1: Phaser.Tilemaps.DynamicTilemapLayer;
-    treetopLayer2: Phaser.Tilemaps.DynamicTilemapLayer;
-    treetopLayer3: Phaser.Tilemaps.DynamicTilemapLayer;
     forest: Forest;
     villageNodes: VillageNode[] = [];
 
@@ -44,6 +42,8 @@ export class Village {
         this.initGroundBordersAndCorners(x, y);
         this.lightGrass(x, y);
         this.treeWalls(x, y);
+
+        this.treeBaseLayer.setCollision(449);
     }
 
     private initTilemap(): void {
@@ -73,18 +73,6 @@ export class Village {
         // init treelayers
         this.treeBaseLayer = this.tilemap.createBlankDynamicLayer(
             "treeBaseLayer",
-            this.tileset
-        );
-        this.treetopLayer1 = this.tilemap.createBlankDynamicLayer(
-            "treetopLayer1",
-            this.tileset
-        );
-        this.treetopLayer2 = this.tilemap.createBlankDynamicLayer(
-            "treetopLayer2",
-            this.tileset
-        );
-        this.treetopLayer3 = this.tilemap.createBlankDynamicLayer(
-            "treetopLayer3",
             this.tileset
         );
     }
@@ -378,41 +366,15 @@ export class Village {
                         0 ===
                         false
                 ) {
-                    this.treetopLayer1.putTileAt(640, t.x - 1, t.y);
-                    this.treetopLayer1.putTileAt(641, t.x, t.y);
-                    this.treetopLayer1.putTileAt(642, t.x + 1, t.y);
                     const treeFlavor = nodeRandomizer.between(0, 1);
-                    this.treetopLayer2.putTileAt(
-                        544 + treeFlavor * 64,
-                        t.x - 1,
-                        t.y - 1
-                    );
-                    this.treetopLayer2.putTileAt(
-                        545 + treeFlavor * 64,
-                        t.x,
-                        t.y - 1
-                    );
-                    this.treetopLayer2.putTileAt(
-                        546 + treeFlavor * 64,
-                        t.x + 1,
-                        t.y - 1
-                    );
-                    this.treetopLayer3.putTileAt(
-                        512 + treeFlavor * 64,
-                        t.x - 1,
-                        t.y - 2
-                    );
-                    this.treetopLayer3.putTileAt(
-                        513 + treeFlavor * 64,
-                        t.x,
-                        t.y - 2
-                    );
-                    this.treetopLayer3.putTileAt(
-                        514 + treeFlavor * 64,
-                        t.x + 1,
-                        t.y - 2
-                    );
-                    t.index = 480;
+                    t.index = 449;
+                    this.scene.add
+                        .sprite(t.pixelX - 16, t.pixelY + 16, "treetops", 0)
+                        .setOrigin(0, 1)
+                        .setDepth(t.y + 1);
+                    this.treeBaseLayer.putTileAt(448, t.x - 1, t.y);
+                    this.treeBaseLayer.putTileAt(450, t.x + 1, t.y);
+                    this.treeBaseLayer.putTileAt(481, t.x, t.y + 1);
                 }
             });
     }

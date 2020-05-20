@@ -1,13 +1,9 @@
-import { Forest } from "./forest";
 import { GameObjects, Tilemaps } from "phaser";
-import { WangManager } from "./wangManager";
-import { DIRT, DARK_GREEN_GRASS } from "./tileSpriteMappings";
 import { Village } from "./village";
 
 export class MyGameScene extends Phaser.Scene {
     cursors: Phaser.Types.Input.Keyboard.CursorKeys;
-    player: Phaser.GameObjects.Sprite;
-    following: boolean = false;
+    player: Phaser.Physics.Arcade.Sprite;
     cool: boolean = true;
     currentTile: Tilemaps.Tile;
     currentTileText: GameObjects.Text;
@@ -44,7 +40,7 @@ export class MyGameScene extends Phaser.Scene {
                 Math.floor(this.village.config.forestNodeHeight / 2)) *
             16;
 
-        this.player = this.add
+        this.player = this.physics.add
             .sprite(
                 Math.floor(
                     (this.village.config.width / 2) *
@@ -59,7 +55,9 @@ export class MyGameScene extends Phaser.Scene {
                 ),
                 "dude"
             )
-            .setOrigin(0, 0);
+            .setOrigin(0.5, 1);
+        (this.player.body as Phaser.Physics.Arcade.Body).setDrag(200, 200);
+        this.physics.add.collider(this.player, this.village.treeBaseLayer);
         this.currentTile = this.village.tilemap.getTileAtWorldXY(
             this.player.x,
             this.player.y
@@ -68,7 +66,6 @@ export class MyGameScene extends Phaser.Scene {
             .text(256, 256, `(${this.currentTile?.x}, ${this.currentTile?.y})`)
             .setOrigin(1, 1)
             .setScrollFactor(0);
-        this.following = true;
         this.cameras.main.startFollow(this.player, true, 0.1, 0.1).setZoom(1);
         this.cameras.main.setBounds(
             2 * this.village.config.forestNodeWidth * 16,
@@ -80,60 +77,19 @@ export class MyGameScene extends Phaser.Scene {
     }
 
     update(time: number, delta: number): void {
-        if (this.following) {
-            if (this.cool && this.panning === false) {
-                if (this.cursors.up.isDown) {
-                    this.player.y -= 16;
-                }
-                if (this.cursors.down.isDown) {
-                    this.player.y += 16;
-                }
-                if (this.cursors.right.isDown) {
-                    this.player.x += 16;
-                }
-                if (this.cursors.left.isDown) {
-                    this.player.x -= 16;
-                }
-                if (this.cursors.shift.isDown) {
-                    this.cameras.main.zoom =
-                        this.cameras.main.zoom != 0.25
-                            ? (this.cameras.main.zoom = 0.25)
-                            : (this.cameras.main.zoom = 1);
-                }
-                if (this.cursors.space.isDown) {
-                    this.following = false;
-                    this.cameras.main.stopFollow();
-                }
-                this.cooldown();
-            }
-        } else {
+        const body = this.player.body as Phaser.Physics.Arcade.Body;
+        if (this.panning === false) {
             if (this.cursors.up.isDown) {
-                this.cameras.main.scrollY -= 0.25 * delta;
+                body.setVelocityY(-100);
             }
             if (this.cursors.down.isDown) {
-                this.cameras.main.scrollY += 0.25 * delta;
+                body.setVelocityY(100);
             }
             if (this.cursors.right.isDown) {
-                this.cameras.main.scrollX += 0.25 * delta;
+                body.setVelocityX(100);
             }
             if (this.cursors.left.isDown) {
-                this.cameras.main.scrollX -= 0.25 * delta;
-            }
-            if (this.cursors.shift.isDown) {
-                if (this.cool) {
-                    this.cameras.main.zoom =
-                        this.cameras.main.zoom === 1
-                            ? (this.cameras.main.zoom = 0.1)
-                            : (this.cameras.main.zoom = 1);
-                    this.cooldown();
-                }
-            }
-            if (this.cursors.space.isDown) {
-                if (this.cool) {
-                    this.following = true;
-                    this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
-                    this.cooldown();
-                }
+                body.setVelocityX(-100);
             }
         }
 
@@ -181,15 +137,15 @@ export class MyGameScene extends Phaser.Scene {
                     bounds.height + bounds.height * Math.abs(diffY)
                 );
                 this.panning = true;
+                this.cool = false;
+                body.setVelocity(0);
                 this.cameras.main.pan(
                     this.player.x +
                         Math.ceil(this.cameras.main.width / 2) *
-                            (villageNodeX - this.currentNode.x) +
-                        (diffX > 0 || Math.abs(diffY) > 0 ? 0 : 16),
+                            (villageNodeX - this.currentNode.x),
                     this.player.y +
                         Math.ceil(this.cameras.main.height / 2) *
-                            (villageNodeY - this.currentNode.y) +
-                        (diffY > 0 || Math.abs(diffX) > 0 ? 0 : 16),
+                            (villageNodeY - this.currentNode.y),
                     500,
                     Phaser.Math.Easing.Linear,
                     false,
