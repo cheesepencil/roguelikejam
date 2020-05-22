@@ -10,7 +10,7 @@ let fps = 60;
 export const MyGameConfig: GameConfig = {
     type: Phaser.AUTO,
     input: {
-        //gamepad: true,
+        gamepad: true,
         keyboard: true,
     },
     render: {
@@ -24,7 +24,6 @@ export const MyGameConfig: GameConfig = {
     physics: {
         default: "arcade",
         arcade: {
-            //debug: true,
             gravity: { y: 0 },
             fps: fps,
         },
@@ -33,7 +32,6 @@ export const MyGameConfig: GameConfig = {
     height: 256,
     fps: {
         target: fps,
-        //forceSetTimeOut: true
     },
     scene: [MyPreloaderScene, MyLoaderScene, MyTitleScene, MyGameScene],
 };

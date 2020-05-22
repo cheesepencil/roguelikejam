@@ -37,13 +37,23 @@ export class Village {
         this.forest.debugDrawForest(this.scene);
     }
 
-    drawNode(x: number, y: number): void {
-        this.drawPaths(x, y);
+    getNodeAt(x: number, y: number): VillageNode {
+        const villageNode = this.villageNodes.filter(
+            (n) => n.x === x && n.y === y
+        )[0];
+        
+        return villageNode ?? this.drawNode(x, y);
+    }
+
+    private drawNode(x: number, y: number): VillageNode {
+        const villageNode = this.drawPaths(x, y);
         this.initGroundBordersAndCorners(x, y);
         this.lightGrass(x, y);
         this.treeWalls(x, y);
 
         this.treeBaseLayer.setCollision(449);
+
+        return villageNode;
     }
 
     private initTilemap(): void {
@@ -166,7 +176,7 @@ export class Village {
         wangifier.wangify();
     }
 
-    private drawPaths(x: number, y: number): void {
+    private drawPaths(x: number, y: number): VillageNode {
         const nodeRandomizer = new Phaser.Math.RandomDataGenerator([
             "paths",
             x.toString(),
@@ -287,6 +297,7 @@ export class Village {
             this.config.forestNodeHeight
         );
         wangifier.wangify();
+        return villageNode;
     }
 
     private clobberNearby(

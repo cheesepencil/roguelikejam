@@ -1,6 +1,5 @@
 ## On Deck
 
-* controls refactor/cleanup
 
 ## To Do
 
@@ -34,3 +33,4 @@
 * Reasonably accurate general purpose wang-tile renderer
 * smooth transitions between nodes
 * tilemap depth rendering (treetops)
+* controls refactor/cleanup
