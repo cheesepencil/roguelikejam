@@ -26,7 +26,7 @@ export class Forest {
             Math.floor(height / 2)
         );
         let starters: ForestNode[] = [
-            this.getNode(crossroads.x, crossroads.y - 1),
+            //this.getNode(crossroads.x, crossroads.y - 1),
             this.getNode(crossroads.x, crossroads.y + 1),
             this.getNode(crossroads.x - 1, crossroads.y),
             this.getNode(crossroads.x + 1, crossroads.y),
@@ -38,7 +38,7 @@ export class Forest {
         }
 
         let passes = 0;
-        while (passes < 4) {
+        while (passes < starters.length) {
             passes = 0;
             for (let i = 0; i < starters.length; i++) {
                 let here = starters[i];
