@@ -3,8 +3,10 @@ import { Village } from "./village";
 import { MyHero } from "./myHero";
 import { VillageNode } from "./villageNode";
 import { InputManager } from "./inputManager";
+import { MyUiScene } from "./myUiScene";
 
 export class MyGameScene extends Phaser.Scene {
+    debug: boolean = true;
     hero: MyHero;
     controls: InputManager;
 
@@ -26,6 +28,8 @@ export class MyGameScene extends Phaser.Scene {
     }
 
     create(): void {
+        this.scene.launch("MyUiScene", { debug: this.debug });
+
         if (!this.controls) {
             this.controls = new InputManager(this);
         }
@@ -51,12 +55,6 @@ export class MyGameScene extends Phaser.Scene {
             16;
 
         this.hero = new MyHero(this, playerX, playerY);
-
-        // // DEBUG
-        // this.currentTileText = this.add
-        //     .text(256, 256, `(${this.currentTile?.x}, ${this.currentTile?.y})`)
-        //     .setOrigin(1, 1)
-        //     .setScrollFactor(0);
 
         // should this go sometwhere else?
         this.cameras.main.startFollow(this.hero, true, 0.1, 0.1).setZoom(1);
@@ -90,9 +88,24 @@ export class MyGameScene extends Phaser.Scene {
         }
 
         if (this.hero.enteredNewNode) {
+            //debug
+            const ui = this.scene.get("MyUiScene");
+            ui.events.emit(
+                "forestDebug",
+                this.village.forest,
+                this.hero.currentNodeCoords
+            );
+
             const newNodeCoords = this.hero.currentNodeCoords;
             this.village.getNodeAt(newNodeCoords.x, newNodeCoords.y);
             this.pan();
+        }
+
+        //debug
+        if (this.debug) {
+            const ui = this.scene.get("MyUiScene");
+            ui.events.emit("nodeCoordsDebug", this.hero.currentNodeCoords);
+            ui.events.emit("tileCoordsDebug", this.hero.currentTile);
         }
     }
 

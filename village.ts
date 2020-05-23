@@ -33,8 +33,6 @@ export class Village {
             Math.floor(config.width / 2),
             Math.floor(config.height / 2)
         );
-
-        this.forest.debugDrawForest(this.scene);
     }
 
     getNodeAt(x: number, y: number): VillageNode {

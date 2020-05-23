@@ -5,6 +5,7 @@ export class Forest {
     height: number;
     nodes: ForestNode[];
     randomizer: Phaser.Math.RandomDataGenerator;
+    debugMap: Phaser.GameObjects.Container;
 
     constructor(width: number, height: number, seed: string[]) {
         this.nodes = [];
@@ -170,28 +171,41 @@ export class Forest {
         secondNode.connections.push({ node: firstNode, entrance });
     }
 
-    debugDrawForest(scene: Phaser.Scene): void {
+    debugDrawForest(
+        scene: Phaser.Scene,
+        x: number = undefined,
+        y: number = undefined
+    ): void {
+        this.debugMap?.destroy();
+        this.debugMap = scene.add.container(0, 0);
         let passageSize = 5;
         let cellSize = 15;
         let cellColor = 0x0000ff;
         let poiColor = 0xff0000;
+        let heroColor = 0x00ff00;
         let passageColor = 0x00dd;
         let drawnUnitSize = cellSize + passageSize;
         for (let i = 0; i < this.nodes.length; i++) {
             let node = this.nodes[i];
             if (node.connections.length === 0) continue;
-            scene.add
+            const nodeColor =
+                node.x === x && node.y === y
+                    ? heroColor
+                    : node.flag
+                    ? poiColor
+                    : cellColor;
+            const debugNode = scene.add
                 .rectangle(
                     passageSize + node.x * drawnUnitSize,
                     passageSize + node.y * drawnUnitSize,
                     cellSize,
                     cellSize,
-                    node.flag ? poiColor : cellColor
+                    nodeColor
                 )
                 .setOrigin(0, 0)
-                .setAlpha(0.25)
-                .setScrollFactor(0);
-            scene.add
+                .setAlpha(0.25);
+            this.debugMap.add(debugNode);
+            const debugNodeSteps = scene.add
                 .text(
                     passageSize + node.x * drawnUnitSize,
                     passageSize + node.y * drawnUnitSize,
@@ -199,8 +213,8 @@ export class Forest {
                     { fontSize: "10px" }
                 )
                 .setOrigin(0, 0)
-                .setAlpha(0.25)
-                .setScrollFactor(0);
+                .setAlpha(0.25);
+            this.debugMap.add(debugNodeSteps);
             let undrawnConnections = node.connections.filter((c) => {
                 return c.node.x > node.x || c.node.y > node.y;
             });
@@ -214,7 +228,7 @@ export class Forest {
 
                 let modX = neighbor.node.x - node.x;
                 let modY = neighbor.node.y - node.y;
-                scene.add
+                const debugConnection = scene.add
                     .rectangle(
                         passageSize + cellSize * modX + node.x * drawnUnitSize,
                         passageSize + cellSize * modY + node.y * drawnUnitSize,
@@ -223,8 +237,8 @@ export class Forest {
                         passageColor
                     )
                     .setOrigin(0, 0)
-                    .setAlpha(0.25)
-                    .setScrollFactor(0);
+                    .setAlpha(0.25);
+                this.debugMap.add(debugConnection);
             }
         }
     }
