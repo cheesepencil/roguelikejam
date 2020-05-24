@@ -6,7 +6,7 @@ import { InputManager } from "./inputManager";
 import { MyUiScene } from "./myUiScene";
 
 export class MyGameScene extends Phaser.Scene {
-    debug: boolean = true;
+    debug: boolean = false;
     hero: MyHero;
     controls: InputManager;
 
@@ -16,11 +16,6 @@ export class MyGameScene extends Phaser.Scene {
     // camera
     panning: boolean = false;
 
-    // DEBUG?
-    // currentTile: Tilemaps.Tile;
-    // currentTileText: GameObjects.Text;
-    // currentNode: VillageNode;
-
     constructor() {
         super({
             key: "MyGameScene",
@@ -28,11 +23,13 @@ export class MyGameScene extends Phaser.Scene {
     }
 
     create(): void {
-        this.scene.launch("MyUiScene", { debug: this.debug });
-
         if (!this.controls) {
             this.controls = new InputManager(this);
         }
+
+        this.scene.launch("MyUiScene", {
+            debug: this.debug,
+        });
 
         this.village = new Village({
             scene: this,
@@ -42,6 +39,17 @@ export class MyGameScene extends Phaser.Scene {
             forestNodeWidth: 36,
             forestNodeHeight: 36,
         });
+
+        this.physics.world.setBounds(
+            0,
+            0,
+            16 *
+                this.village.forest.width *
+                this.village.config.forestNodeWidth,
+            16 *
+                this.village.forest.height *
+                this.village.config.forestNodeHeight
+        );
 
         const playerX =
             (Math.floor(this.village.config.width / 2) *

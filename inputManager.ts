@@ -1,7 +1,7 @@
 import { InputAggregate } from "./inputAggregate";
 
 export class InputManager {
-    private _scene: Phaser.Scene;
+    private _game_scene: Phaser.Scene;
     private _cursors: Phaser.Types.Input.Keyboard.CursorKeys;
     private _w_key: Phaser.Input.Keyboard.Key;
     private _s_key: Phaser.Input.Keyboard.Key;
@@ -9,16 +9,28 @@ export class InputManager {
     private _d_key: Phaser.Input.Keyboard.Key;
     private _ctrl_key: Phaser.Input.Keyboard.Key;
 
-    constructor(scene: Phaser.Scene) {
-        this._scene = scene;
-        this._w_key = scene.input.keyboard.addKey("w");
-        this._s_key = scene.input.keyboard.addKey("s");
-        this._a_key = scene.input.keyboard.addKey("a");
-        this._d_key = scene.input.keyboard.addKey("d");
-        this._ctrl_key = scene.input.keyboard.addKey(
+    constructor(gameScene: Phaser.Scene) {
+        // space action
+        // shift cancel
+        // ctrl menu
+
+        this._game_scene = gameScene;
+        this._w_key = gameScene.input.keyboard.addKey("w");
+        this._s_key = gameScene.input.keyboard.addKey("s");
+        this._a_key = gameScene.input.keyboard.addKey("a");
+        this._d_key = gameScene.input.keyboard.addKey("d");
+        this._ctrl_key = gameScene.input.keyboard.addKey(
             Phaser.Input.Keyboard.KeyCodes.CTRL
         );
-        this._cursors = scene.input.keyboard.createCursorKeys();
+        this._cursors = gameScene.input.keyboard.createCursorKeys();
+
+        // menu events
+        this._cursors.up.on("down", this.menuUp, this);
+        this._w_key.on("down", this.menuUp, this);
+        this._cursors.down.on("down", this.menuDown, this);
+        this._s_key.on("down", this.menuDown, this);
+        this._cursors.space.on("up", this.menuAction, this);
+        this._ctrl_key.on("down", this.menuToggle, this);
     }
 
     getInput(): InputAggregate {
@@ -31,7 +43,7 @@ export class InputManager {
         result.menu = false;
 
         // pad
-        let pad = this._scene.input.gamepad?.pad1;
+        let pad = this._game_scene.input.gamepad?.pad1;
         if (pad) {
             pad.setAxisThreshold(0.25);
 
@@ -48,8 +60,8 @@ export class InputManager {
             if (pad.buttons[15]?.value > 0) result.right = true;
 
             // buttons
-            if (pad.buttons[1]?.value > 0) result.action = true;
-            if (pad.buttons[2]?.value > 0) result.cancel = true;
+            if (pad.A) result.action = true;
+            if (pad.B) result.cancel = true;
             if (pad.buttons[3]?.value > 0) result.menu = true;
         }
 
@@ -64,5 +76,30 @@ export class InputManager {
         if (this._ctrl_key.isDown) result.menu = true;
 
         return result;
+    }
+
+    menuDown(): void {
+        const ui = this._game_scene.scene.get("MyUiScene");
+        ui.events.emit("menuDown");
+    }
+
+    menuUp(): void {
+        const ui = this._game_scene.scene.get("MyUiScene");
+        ui.events.emit("menuUp");
+    }
+
+    menuAction(): void {
+        const ui = this._game_scene.scene.get("MyUiScene");
+        ui.events.emit("menuAction");
+    }
+
+    menuCancel(): void {
+        const ui = this._game_scene.scene.get("MyUiScene");
+        ui.events.emit("menuCancel");
+    }
+
+    menuToggle(): void {
+        const ui = this._game_scene.scene.get("MyUiScene");
+        ui.events.emit("menuToggle");
     }
 }

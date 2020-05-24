@@ -1,16 +1,16 @@
 ## On Deck
 
+* dialogue trees as JSON data
+* dialogue engine
 
 ## To Do
 
 * Character sprites
-* Dialogue system
 * Clock/timer
 * Reference map
 * houses?
 * clutter (flowers, pavers)
 * NPC sprite randomizer
-* NPC dialogue
 
 ## Probably
 
@@ -34,3 +34,7 @@
 * smooth transitions between nodes
 * tilemap depth rendering (treetops)
 * controls refactor/cleanup
+
+## Bugs
+
+* null currenttile when colliding with south world boundary
