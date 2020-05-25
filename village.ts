@@ -33,13 +33,20 @@ export class Village {
             Math.floor(config.width / 2),
             Math.floor(config.height / 2)
         );
+
+        this.scene.physics.world.setBounds(
+            0,
+            0,
+            16 * this.forest.width * this.config.forestNodeWidth,
+            16 * this.forest.height * this.config.forestNodeHeight
+        );
     }
 
     getNodeAt(x: number, y: number): VillageNode {
         const villageNode = this.villageNodes.filter(
             (n) => n.x === x && n.y === y
         )[0];
-        
+
         return villageNode ?? this.drawNode(x, y);
     }
 

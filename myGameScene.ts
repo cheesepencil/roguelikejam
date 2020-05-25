@@ -22,15 +22,17 @@ export class MyGameScene extends Phaser.Scene {
         });
     }
 
-    create(): void {
+    init(): void {
         if (!this.controls) {
             this.controls = new InputManager(this);
         }
-
         this.scene.launch("MyUiScene", {
             debug: this.debug,
         });
+    }
 
+    create(): void {
+        // create world
         this.village = new Village({
             scene: this,
             seed: ["debug"],
@@ -40,31 +42,11 @@ export class MyGameScene extends Phaser.Scene {
             forestNodeHeight: 36,
         });
 
-        this.physics.world.setBounds(
-            0,
-            0,
-            16 *
-                this.village.forest.width *
-                this.village.config.forestNodeWidth,
-            16 *
-                this.village.forest.height *
-                this.village.config.forestNodeHeight
-        );
+        // create hero
+        const startPoint = this.getHeroStartingPoint();
+        this.hero = new MyHero(this, startPoint.x, startPoint.y);
 
-        const playerX =
-            (Math.floor(this.village.config.width / 2) *
-                this.village.config.forestNodeWidth +
-                Math.floor(this.village.config.forestNodeWidth / 2)) *
-            16;
-        const playerY =
-            (Math.floor(this.village.config.height / 2) *
-                this.village.config.forestNodeHeight +
-                Math.floor(this.village.config.forestNodeHeight / 2)) *
-            16;
-
-        this.hero = new MyHero(this, playerX, playerY);
-
-        // should this go sometwhere else?
+        // init camera
         this.cameras.main.startFollow(this.hero, true, 0.1, 0.1).setZoom(1);
         this.cameras.main.setBounds(
             2 * this.village.config.forestNodeWidth * 16,
@@ -165,5 +147,20 @@ export class MyGameScene extends Phaser.Scene {
                 }
             }
         );
+    }
+
+    getHeroStartingPoint(): Phaser.Geom.Point {
+        const playerX =
+            (Math.floor(this.village.config.width / 2) *
+                this.village.config.forestNodeWidth +
+                Math.floor(this.village.config.forestNodeWidth / 2)) *
+            16;
+        const playerY =
+            (Math.floor(this.village.config.height / 2) *
+                this.village.config.forestNodeHeight +
+                Math.floor(this.village.config.forestNodeHeight / 2)) *
+            16;
+
+        return new Phaser.Geom.Point(playerX, playerY);
     }
 }
