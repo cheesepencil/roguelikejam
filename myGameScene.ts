@@ -4,11 +4,13 @@ import { MyHero } from "./myHero";
 import { VillageNode } from "./villageNode";
 import { InputManager } from "./inputManager";
 import { MyUiScene } from "./myUiScene";
+import { MyNPC } from "./myNpc";
 
 export class MyGameScene extends Phaser.Scene {
     debug: boolean = false;
     hero: MyHero;
     controls: InputManager;
+    npcs: Phaser.Physics.Arcade.Group;
 
     // world
     village: Village;
@@ -54,6 +56,10 @@ export class MyGameScene extends Phaser.Scene {
             this.village.config.forestNodeWidth * 16,
             this.village.config.forestNodeHeight * 16
         );
+
+        // test NPC
+        const npc = new MyNPC(this, startPoint.x - 32, startPoint.y);
+        this.physics.add.group(npc);
     }
 
     update(time: number, delta: number): void {
@@ -62,7 +68,7 @@ export class MyGameScene extends Phaser.Scene {
         const body = this.hero.body;
         const input = this.controls.getInput();
 
-        if (this.panning === false) {
+        if (this.canMove()) {
             if (input.up) {
                 body.setVelocityY(-100);
             }
@@ -74,6 +80,8 @@ export class MyGameScene extends Phaser.Scene {
             }
             if (input.left) {
                 body.setVelocityX(-100);
+            }
+            if (input.action) {
             }
         }
 
@@ -162,5 +170,9 @@ export class MyGameScene extends Phaser.Scene {
             16;
 
         return new Phaser.Geom.Point(playerX, playerY);
+    }
+
+    canMove(): boolean {
+        return this.panning === false;
     }
 }

@@ -19,7 +19,7 @@ export class MyHero extends Phaser.GameObjects.Sprite {
         scene.physics.add.collider(this, scene.village.treeBaseLayer);
 
         this.body = this.body as Phaser.Physics.Arcade.Body;
-        this.body.setDrag(400, 400);
+        this.body.setDrag(600, 600);
         this.body.setCollideWorldBounds(true);
 
         this.setOrigin(0.5, 1);
