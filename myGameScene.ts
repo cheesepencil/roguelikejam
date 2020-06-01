@@ -59,7 +59,7 @@ export class MyGameScene extends Phaser.Scene {
 
         // test NPC
         const npc = new MyNPC(this, startPoint.x - 32, startPoint.y);
-        this.physics.add.group(npc);
+        this.npcs = this.physics.add.group(npc);
     }
 
     update(time: number, delta: number): void {
@@ -82,6 +82,18 @@ export class MyGameScene extends Phaser.Scene {
                 body.setVelocityX(-100);
             }
             if (input.action) {
+                // begins dialogue with a nearby NPC
+                const rect = new Phaser.Geom.Rectangle(
+                    this.hero.x - 16,
+                    this.hero.y - 16,
+                    32,
+                    32
+                );
+                this.npcs.getChildren().forEach((n) => {
+                    const npc = n as MyNPC;
+                    const nearby = rect.contains(npc.x, npc.y);
+                    console.log(nearby);
+                });
             }
         }
 
