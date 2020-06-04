@@ -15,8 +15,9 @@ export class MyGameScene extends Phaser.Scene {
     // world
     village: Village;
 
-    // camera
+    // camera and scene
     panning: boolean = false;
+    inUi: boolean = false;
 
     constructor() {
         super({
@@ -92,7 +93,11 @@ export class MyGameScene extends Phaser.Scene {
                 this.npcs.getChildren().forEach((n) => {
                     const npc = n as MyNPC;
                     const nearby = rect.contains(npc.x, npc.y);
-                    console.log(nearby);
+                    if (nearby) {
+                        this.inUi = true;
+                        const ui = this.scene.get("MyUiScene");
+                        ui.events.emit("startDialogue");
+                    }
                 });
             }
         }
@@ -185,6 +190,9 @@ export class MyGameScene extends Phaser.Scene {
     }
 
     canMove(): boolean {
-        return this.panning === false;
+        let canMove = true;
+        canMove = canMove && this.panning === false;
+        canMove = canMove && this.inUi === false;
+        return canMove;
     }
 }
