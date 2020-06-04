@@ -24,7 +24,6 @@ export class MyUiScene extends Phaser.Scene {
     }
 
     create(data: { debug: boolean }): void {
-        this.events.removeAllListeners();
         this.textContainer = this.add.container(0, 0);
         this.profileContainer = this.add.container(0, 0);
         this.textBg = this.add
@@ -75,19 +74,17 @@ export class MyUiScene extends Phaser.Scene {
 
     private startDialogue(): void {
         this.tweens.add({
-            targets: this.profileContainer,
+            targets: [this.profileContainer],
             x: 0,
             duration: 500,
-            repeat: 0
+            repeat: 0,
         });
         this.tweens.add({
-            targets: this.textContainer,
+            targets: [this.textContainer],
             x: 0,
             duration: 500,
-            repeat: 0
+            repeat: 0,
         });
-        // this.textContainer.setX(0);
-        // this.profileContainer.setX(0);
     }
 
     private menuToggle(): void {}
