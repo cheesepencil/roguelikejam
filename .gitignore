@@ -1,3 +1,6 @@
 node_modules/
 dist/
 .cache/
+.vs/slnx.sqlite
+.vs/VSWorkspaceState.json
+.vs/roguelikejam/v16/.suo

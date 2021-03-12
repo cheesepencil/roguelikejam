@@ -106,8 +106,6 @@ export class MyUiScene extends Phaser.Scene {
     }
 
     private updateForestDebug(forest: Forest, node: Phaser.Geom.Point): void {
-        if ((this.data as any).debug) {
-            forest.debugDrawForest(this, node.x, node.y);
-        }
+        forest.debugDrawForest(this, node.x, node.y);
     }
 }

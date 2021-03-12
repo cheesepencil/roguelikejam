@@ -7,7 +7,7 @@ import { MyUiScene } from "./myUiScene";
 import { MyNPC } from "./myNpc";
 
 export class MyGameScene extends Phaser.Scene {
-    debug: boolean = false;
+    debug: boolean = true;
     hero: MyHero;
     controls: InputManager;
     npcs: Phaser.Physics.Arcade.Group;
